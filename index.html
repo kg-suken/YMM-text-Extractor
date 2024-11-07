@@ -54,7 +54,7 @@
         <input type="file" id="fileInput" accept=".ymmp">
         <div class="btn-container">
             <button onclick="extractText()">テキスト抽出</button>
-            <button onclick="copyText()">コピー</button>
+            <button id="copyButton" onclick="copyText()">コピー</button>
         </div>
         <pre id="output">ここに抽出結果が表示されます</pre>
     </div>
@@ -77,10 +77,10 @@
                 let results = "";
 
                 while ((matches = pattern.exec(text)) !== null) {
-                    results += matches[2] + "\n";
+                    results += matches[2].replace(/\\n/g, '') + "\n"; // テキスト内の改行コードのみを削除
                 }
 
-                output.textContent = results;
+                output.textContent = results.trim(); // 最後の余分な改行を削除
             };
 
             reader.onerror = function() {
@@ -92,10 +92,14 @@
 
         function copyText() {
             const output = document.getElementById('output').textContent;
+            const copyButton = document.getElementById('copyButton');
 
             if (output) {
                 navigator.clipboard.writeText(output)
-                .then(() => alert("テキストがコピーされました"))
+                .then(() => {
+                    copyButton.textContent = "コピー済み"; // ボタンの文字を変更
+                    setTimeout(() => copyButton.textContent = "コピー", 2000); // 2秒後に元に戻す
+                })
                 .catch(err => console.error("コピーに失敗しました: ", err));
             } else {
                 alert("コピーするテキストがありません");
